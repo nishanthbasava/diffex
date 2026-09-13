@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* DiffEx Design System - Medical/Clinical Theme */
+
+@layer base {
+  :root {
+    /* Neutral cool-gray background */
+    --background: 220 14% 96%;
+    --foreground: 220 20% 14%;
+
+    /* Cards */
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 14%;
+
+    /* Desaturated slate-blue primary — clinical, not SaaS */
+    --primary: 210 25% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Neutral secondary */
+    --secondary: 220 12% 93%;
+    --secondary-foreground: 220 15% 25%;
+
+    /* Muted */
+    --muted: 220 10% 91%;
+    --muted-foreground: 220 10% 46%;
+
+    /* Accent — very subtle blue-gray */
+    --accent: 215 15% 93%;
+    --accent-foreground: 210 25% 30%;
+
+    /* High acuity only — warm amber/red reserved for clinical urgency */
+    --destructive: 4 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 35 85% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Success — muted green */
+    --success: 152 40% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 220 13% 87%;
+    --input: 220 13% 87%;
+    --ring: 210 25% 35%;
+
+    --radius: 0.375rem;
+
+    /* Panel colors */
+    --panel: 220 10% 97%;
+    --panel-header: 220 12% 95%;
+
+    /* Chip colors by type */
+    --chip-symptom: 340 65% 47%;
+    --chip-vital: 200 80% 45%;
+    --chip-history: 260 55% 50%;
+    --chip-lab: 145 55% 40%;
+    --chip-test: 25 85% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-card rounded-md border border-border shadow-none;
+  }
+
+  .panel-header {
+    @apply px-5 py-3 border-b border-border bg-panel-header rounded-t-md;
+  }
+
+  .panel-content {
+    @apply p-5;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all;
+  }
+
+  .chip-symptom {
+    @apply bg-[hsl(340,65%,95%)] text-[hsl(340,65%,35%)];
+  }
+
+  .chip-vital {
+    @apply bg-[hsl(200,80%,93%)] text-[hsl(200,80%,30%)];
+  }
+
+  .chip-history {
+    @apply bg-[hsl(260,55%,95%)] text-[hsl(260,55%,35%)];
+  }
+
+  .chip-lab {
+    @apply bg-[hsl(145,55%,92%)] text-[hsl(145,55%,28%)];
+  }
+
+  .chip-test {
+    @apply bg-[hsl(25,85%,93%)] text-[hsl(25,85%,35%)];
+  }
+
+  .probability-bar {
+    @apply h-2.5 rounded-full bg-gradient-to-r from-primary/80 to-primary transition-all duration-500 ease-out;
+  }
+
+  .high-acuity-badge {
+    @apply inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-semibold bg-destructive/10 text-destructive;
+  }
+
+  .suggestion-card {
+    @apply p-4 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors;
+  }
+
+  .disclaimer-banner {
+    @apply bg-destructive/5 border-b border-destructive/20 text-destructive px-4 py-2.5 text-center text-sm font-medium;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
