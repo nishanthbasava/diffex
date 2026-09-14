@@ -3,6 +3,7 @@ import { getConditions, getAllEdges, type Condition, type ConditionFeatureEdge }
 import { isCacheReady, getSupabaseFeatureId } from './knowledgeCache';
 import { getPriorWeight, getPriorWeightBreakdown, derivePatientContext, type PriorBreakdown } from './priorsStore';
 import { getIcd10CodesForCondition } from '@/data/icd10Dictionary';
+import { recordLatency, getLatencyStats } from './perfStats';
 
 export interface FeatureContribution {
   feature_id: string;
@@ -38,6 +39,8 @@ export interface CoverageInfo {
 export interface DifferentialOutput {
   results: DifferentialResult[];
   coverage: CoverageInfo;
+  /** Wall-clock duration of this computeDifferential run */
+  durationMs: number;
 }
 
 // Labels of conditions that should always be included in candidate set (safety net)
@@ -54,6 +57,7 @@ const LOW_COVERAGE_THRESHOLD = 0.15;
 const MIN_CANDIDATE_COUNT = 5;
 
 export function computeDifferential(patientId: string): DifferentialOutput {
+  const startMs = performance.now();
   const evidence = getPatientEvidence(patientId);
   const conditions = getConditions();
   const allEdges = getAllEdges();
@@ -67,8 +71,10 @@ export function computeDifferential(patientId: string): DifferentialOutput {
     totalConditions: conditions.length,
   };
 
-  if (conditions.length === 0) return { results: [], coverage: emptyCoverage };
-  if (evidence.length === 0) return { results: [], coverage: emptyCoverage };
+  // Trivial early-exit runs are not recorded as latency samples — they would
+  // skew the median low without exercising the scoring path.
+  if (conditions.length === 0) return { results: [], coverage: emptyCoverage, durationMs: performance.now() - startMs };
+  if (evidence.length === 0) return { results: [], coverage: emptyCoverage, durationMs: performance.now() - startMs };
 
   // Index edges by condition_id
   const edgesByCondition = new Map<string, ConditionFeatureEdge[]>();
@@ -296,10 +302,17 @@ export function computeDifferential(patientId: string): DifferentialOutput {
     totalConditions: conditions.length,
   };
 
+  const durationMs = performance.now() - startMs;
+  recordLatency(durationMs);
+  const latencyStats = getLatencyStats();
+
   console.log(`[DiffEx] Coverage: ${matchedEdgeCount} edges matched / ${evidenceCount} evidence items = ${coverageRatio.toFixed(2)}. Candidates: ${candidateIds.size}/${conditions.length}${useFallback ? ' (fallback)' : ''}`);
   console.log('[DiffEx] Top 5 differential:', results.slice(0, 5).map(r =>
     `${r.label}: ${r.probabilityPercent.toFixed(1)}% [${r.contributingFeatures.join(', ')}]`
   ));
+  if (latencyStats) {
+    console.log(`[DiffEx] Latency: ${durationMs.toFixed(1)} ms (median ${latencyStats.medianMs.toFixed(1)} ms, p95 ${latencyStats.p95Ms.toFixed(1)} ms over ${latencyStats.count} runs)`);
+  }
 
-  return { results, coverage };
+  return { results, coverage, durationMs };
 }
