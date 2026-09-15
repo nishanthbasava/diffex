@@ -147,6 +147,39 @@ export function getPriorWeight(conditionId: string, evidence: PatientEvidenceJoi
   return getPriorWeightBreakdown(conditionId, evidence, conditionPriorBase).prior_weight;
 }
 
+// ---- Reseed migration ----
+
+/**
+ * When the knowledge-base seed version bumps, conditions are regenerated with
+ * new ids. Remap existing prior rows (including user edits) to the new ids by
+ * matching condition labels, drop rows whose condition no longer exists, and
+ * clear the seeded flag so the next seedPriorsIfEmpty() fills any gaps.
+ */
+export function remapPriorConditionIds(
+  oldConditions: { id: string; label: string }[],
+  newConditions: { id: string; label: string }[]
+): void {
+  if (typeof window === 'undefined') return;
+  const rows = loadPriors();
+  if (rows.length > 0) {
+    const oldIdToLabel = new Map(oldConditions.map(c => [c.id, c.label]));
+    const labelToNewId = new Map(newConditions.map(c => [c.label, c.id]));
+    const newIds = new Set(newConditions.map(c => c.id));
+    const remapped: PriorRow[] = [];
+    for (const row of rows) {
+      if (newIds.has(row.condition_id)) {
+        remapped.push(row);
+        continue;
+      }
+      const label = oldIdToLabel.get(row.condition_id);
+      const newId = label != null ? labelToNewId.get(label) : undefined;
+      if (newId) remapped.push({ ...row, condition_id: newId });
+    }
+    savePriors(remapped);
+  }
+  localStorage.removeItem(PRIORS_SEEDED_KEY);
+}
+
 // ---- Public API for editor ----
 
 export function getAllPriors(): PriorRow[] {

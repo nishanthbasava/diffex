@@ -105,8 +105,7 @@ export const VIGNETTES: Vignette[] = [
     expected: ['Meningitis'], triage: 'emergent',
     ageYears: 18, sex: 'male',
     // "18 y/o m, 3 days severe headache, fever, photophobia, neck stiffness"
-    // (headache and photophobia not in registry vocabulary)
-    findings: present('Fever', 'Neck stiffness'),
+    findings: present('Headache', 'Fever', 'Photophobia', 'Neck stiffness'),
   },
   {
     id: 'sg-pneumonia-adult', publishedDiagnosis: 'Pneumonia',
@@ -152,7 +151,7 @@ export const VIGNETTES: Vignette[] = [
     ageYears: 24, sex: 'male',
     // "24 y/o m, sore throat, fever (102.2), headache, no cough, tonsilar exudates"
     findings: [
-      ...present('Sore throat', 'Fever', 'Pharyngeal exudate'),
+      ...present('Sore throat', 'Fever', 'Headache', 'Pharyngeal exudate'),
       ...absent('Cough'),
     ],
   },
@@ -169,7 +168,7 @@ export const VIGNETTES: Vignette[] = [
     expected: ['Influenza'], triage: 'non-emergent',
     ageYears: 30, sex: 'female',
     // "30 y/o f, 2 day fever, cough, headache, weakness, did not get flu shot"
-    findings: present('Fever', 'Cough', 'Fatigue'),
+    findings: present('Fever', 'Cough', 'Headache', 'Fatigue'),
   },
   {
     id: 'sg-pud', publishedDiagnosis: 'Peptic Ulcer Disease',
@@ -227,7 +226,7 @@ export const VIGNETTES: Vignette[] = [
     ageYears: 26, sex: 'male',
     // "26 y/o m, 2 day sore throat, headache, cough, no fever" (pharyngeal erythema on exam)
     findings: [
-      ...present('Sore throat', 'Cough', 'Mucosal erythema'),
+      ...present('Sore throat', 'Headache', 'Cough', 'Mucosal erythema'),
       ...absent('Fever'),
     ],
   },
@@ -254,7 +253,7 @@ export const VIGNETTES: Vignette[] = [
     // "30 y/o m, 2 day Hx of runny nose, sore throat, hot, sweaty, mild headache,
     //  cough with clear sputum, muscle aches, no fever or neck stiffness" (smokes 10/day)
     findings: [
-      ...present('Rhinorrhea', 'Sore throat', 'Cough', 'Smoking history'),
+      ...present('Rhinorrhea', 'Sore throat', 'Headache', 'Cough', 'Smoking history'),
       ...absent('Fever', 'Neck stiffness'),
     ],
   },

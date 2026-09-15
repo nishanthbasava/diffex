@@ -3,6 +3,8 @@ import {
   derivePatientContext,
   getPriorWeightBreakdown,
   updatePrior,
+  remapPriorConditionIds,
+  getAllPriors,
   type PriorRow,
 } from "./priorsStore";
 import type { PatientEvidenceJoined } from "./evidenceStore";
@@ -87,6 +89,28 @@ describe("getPriorWeightBreakdown", () => {
     const breakdown = getPriorWeightBreakdown("c1", evidence);
     expect(breakdown.age_bucket).toBe("65+");
     expect(breakdown.prior_weight).toBeCloseTo(0.03 * 2.0 * 1.5 * 2.0);
+  });
+
+  it("remaps prior rows to regenerated condition ids by label on reseed", () => {
+    const mkRow = (conditionId: string): PriorRow => ({
+      condition_id: conditionId,
+      base_prevalence: 0.03,
+      age_multipliers: { neonate: 1, infant: 1, child: 1, adolescent: 1, "18-39": 1, "40-64": 1, "65+": 1 },
+      sex_multipliers: { male: 1, female: 1, unknown: 1 },
+      smoking_multipliers: { smoker: 1, non_smoker: 1, unknown: 1 },
+    });
+    updatePrior(mkRow("old_pe"));
+    updatePrior(mkRow("old_gone"));
+
+    remapPriorConditionIds(
+      [{ id: "old_pe", label: "Pulmonary Embolism" }, { id: "old_gone", label: "Removed Condition" }],
+      [{ id: "new_pe", label: "Pulmonary Embolism" }]
+    );
+
+    const rows = getAllPriors();
+    expect(rows.map(r => r.condition_id)).toEqual(["new_pe"]);
+    // seeded flag cleared so the next seedPriorsIfEmpty can fill gaps
+    expect(localStorage.getItem("diffex_priors_seeded_v2")).toBeNull();
   });
 
   it("labels prevalence tiers from base prevalence", () => {

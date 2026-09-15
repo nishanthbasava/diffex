@@ -1,9 +1,13 @@
 import { upsertFeature, findFeatureByLabelOrSynonym } from './evidenceStore';
 import { isCacheReady, getCachedConditions, getCachedEdges } from './knowledgeCache';
+import { remapPriorConditionIds } from './priorsStore';
 
 const CONDITIONS_KEY = 'diffex_conditions';
 const EDGES_KEY = 'diffex_condition_feature_edges';
-const SEEDED_KEY = 'diffex_differential_seeded_v6';
+// v7: added Headache and Photophobia features with edges (meningitis,
+// encephalitis, influenza, URI, pharyngitis). Reseeding regenerates condition
+// ids; existing prior rows are remapped by label via remapPriorConditionIds.
+const SEEDED_KEY = 'diffex_differential_seeded_v7';
 
 // ---- Types ----
 
@@ -97,6 +101,11 @@ export function seedIfEmpty(): void {
 
   // Clear old seed data to re-seed
   localStorage.removeItem('diffex_differential_seeded_v2');
+  localStorage.removeItem('diffex_differential_seeded_v6');
+
+  // Capture the outgoing conditions so prior rows can be remapped to the
+  // regenerated condition ids after seeding.
+  const previousConditions = loadConditions();
 
   // ---- Shared features (cardiopulm) ----
   const fBreathing = ensureFeature('Breathing issues', 'symptom', 'boolean', ['shortness of breath', 'sob', 'dyspnea', 'trouble breathing']);
@@ -174,6 +183,8 @@ export function seedIfEmpty(): void {
   const fTesticularPain = ensureFeature('Testicular pain', 'symptom', 'boolean', ['testicular pain', 'scrotal pain', 'scrotal swelling']);
   const fSeizureActivity = ensureFeature('Seizure activity', 'symptom', 'boolean', ['seizure', 'convulsion', 'seizure activity', 'tonic clonic']);
   const fNeckStiffness = ensureFeature('Neck stiffness', 'symptom', 'boolean', ['neck stiffness', 'nuchal rigidity', 'meningismus']);
+  const fHeadache = ensureFeature('Headache', 'symptom', 'boolean', ['headache', 'head pain', 'cephalgia']);
+  const fPhotophobia = ensureFeature('Photophobia', 'symptom', 'boolean', ['photophobia', 'light sensitivity', 'sensitivity to light']);
   const fBulgingFontanelle = ensureFeature('Bulging fontanelle', 'symptom', 'boolean', ['bulging fontanelle', 'tense fontanelle', 'full fontanelle']);
   const fConjunctivitis = ensureFeature('Conjunctivitis', 'symptom', 'boolean', ['conjunctivitis', 'red eyes', 'bilateral conjunctival injection']);
   const fStrawberryTongue = ensureFeature('Strawberry tongue', 'symptom', 'boolean', ['strawberry tongue', 'red tongue with papillae']);
@@ -657,6 +668,7 @@ export function seedIfEmpty(): void {
 
     // Viral URI
     { condition_id: c('Viral URI'), feature_id: fRhinorrhea, lr_present: 4.0, lr_absent: 0.3 },
+    { condition_id: c('Viral URI'), feature_id: fHeadache, lr_present: 1.5, lr_absent: 0.8 },
     { condition_id: c('Viral URI'), feature_id: fCough, lr_present: 2.5, lr_absent: 0.5 },
     { condition_id: c('Viral URI'), feature_id: fFever, lr_present: 1.8, lr_absent: 0.7 },
     { condition_id: c('Viral URI'), feature_id: fSoreThroat, lr_present: 2.0, lr_absent: 0.7 },
@@ -664,6 +676,7 @@ export function seedIfEmpty(): void {
 
     // Influenza
     { condition_id: c('Influenza'), feature_id: fFever, lr_present: 4.0, lr_absent: 0.3 },
+    { condition_id: c('Influenza'), feature_id: fHeadache, lr_present: 2.5, lr_absent: 0.6 },
     { condition_id: c('Influenza'), feature_id: fCough, lr_present: 2.5, lr_absent: 0.5 },
     { condition_id: c('Influenza'), feature_id: fFatigue, lr_present: 3.0, lr_absent: 0.5 },
     { condition_id: c('Influenza'), feature_id: fArthralgia, lr_present: 3.0, lr_absent: 0.5 },
@@ -756,12 +769,15 @@ export function seedIfEmpty(): void {
 
     // Streptococcal Pharyngitis
     { condition_id: c('Streptococcal Pharyngitis'), feature_id: fSoreThroat, lr_present: 4.0, lr_absent: 0.3 },
+    { condition_id: c('Streptococcal Pharyngitis'), feature_id: fHeadache, lr_present: 1.8, lr_absent: 0.8 },
     { condition_id: c('Streptococcal Pharyngitis'), feature_id: fFever, lr_present: 3.0, lr_absent: 0.4 },
     { condition_id: c('Streptococcal Pharyngitis'), feature_id: fPharyngealExudate, lr_present: 5.0, lr_absent: 0.4 },
     { condition_id: c('Streptococcal Pharyngitis'), feature_id: fLymphadenopathy, lr_present: 3.5, lr_absent: 0.5 },
     { condition_id: c('Streptococcal Pharyngitis'), feature_id: fRash, lr_present: 2.0, lr_absent: 0.8 },
 
     // Viral Pharyngitis
+    // (no headache edge: headache is characteristic of influenza and strep,
+    // not of uncomplicated viral pharyngitis)
     { condition_id: c('Viral Pharyngitis'), feature_id: fSoreThroat, lr_present: 3.5, lr_absent: 0.3 },
     { condition_id: c('Viral Pharyngitis'), feature_id: fRhinorrhea, lr_present: 3.0, lr_absent: 0.5 },
     { condition_id: c('Viral Pharyngitis'), feature_id: fCough, lr_present: 2.5, lr_absent: 0.6 },
@@ -875,6 +891,8 @@ export function seedIfEmpty(): void {
     // Meningitis
     { condition_id: c('Meningitis'), feature_id: fFever, lr_present: 4.0, lr_absent: 0.2 },
     { condition_id: c('Meningitis'), feature_id: fNeckStiffness, lr_present: 8.0, lr_absent: 0.3 },
+    { condition_id: c('Meningitis'), feature_id: fHeadache, lr_present: 3.0, lr_absent: 0.4 },
+    { condition_id: c('Meningitis'), feature_id: fPhotophobia, lr_present: 4.0, lr_absent: 0.7 },
     { condition_id: c('Meningitis'), feature_id: fLethargy, lr_present: 3.5, lr_absent: 0.4 },
     { condition_id: c('Meningitis'), feature_id: fBulgingFontanelle, lr_present: 10.0, lr_absent: 0.6 },
     { condition_id: c('Meningitis'), feature_id: fSeizureActivity, lr_present: 3.5, lr_absent: 0.7 },
@@ -884,6 +902,8 @@ export function seedIfEmpty(): void {
 
     // Encephalitis
     { condition_id: c('Encephalitis'), feature_id: fFever, lr_present: 3.5, lr_absent: 0.3 },
+    { condition_id: c('Encephalitis'), feature_id: fHeadache, lr_present: 3.0, lr_absent: 0.5 },
+    { condition_id: c('Encephalitis'), feature_id: fPhotophobia, lr_present: 3.0, lr_absent: 0.8 },
     { condition_id: c('Encephalitis'), feature_id: fSeizureActivity, lr_present: 5.0, lr_absent: 0.5 },
     { condition_id: c('Encephalitis'), feature_id: fLethargy, lr_present: 4.0, lr_absent: 0.4 },
     { condition_id: c('Encephalitis'), feature_id: fNeckStiffness, lr_present: 3.0, lr_absent: 0.6 },
@@ -943,6 +963,11 @@ export function seedIfEmpty(): void {
   ];
 
   saveEdges(edges);
+
+  // Remap existing prior rows (incl. user edits) to the regenerated condition
+  // ids; clears the priors seeded flag so seedPriorsIfEmpty() fills any gaps.
+  remapPriorConditionIds(previousConditions, conditions);
+
   if (typeof window !== 'undefined') localStorage.setItem(SEEDED_KEY, 'true');
   console.log(`[DiffEx] Seeded ${conditions.length} conditions and ${edges.length} edges`);
 }
