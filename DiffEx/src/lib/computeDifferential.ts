@@ -230,12 +230,13 @@ export function computeDifferential(patientId: string): DifferentialOutput {
       });
     }
 
-    // Normalize LR log-sum by matched edge count so conditions with more
-    // edges don't automatically beat conditions with fewer but stronger LRs.
-    // A condition that perfectly explains 3 findings should rank above one
-    // that weakly explains 10.
+    // Normalize LR log-sum by sqrt of matched edge count. A straight mean
+    // erased the advantage of explaining many findings strongly (6 findings
+    // at LR 3 averaged the same as 1 finding at LR 3, letting prior-heavy
+    // conditions win); a raw sum let many weak edges beat few strong ones.
+    // sqrt rewards breadth of explanation with diminishing returns.
     const matchedEdges = allContributions.length;
-    const normalizedLR = matchedEdges > 0 ? lrLogSum / matchedEdges : 0;
+    const normalizedLR = matchedEdges > 0 ? lrLogSum / Math.sqrt(matchedEdges) : 0;
 
     // Unexplained penalty: present findings this condition has no edge for.
     let unexplainedPenaltyLog = 0;

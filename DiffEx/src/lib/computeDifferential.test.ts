@@ -190,6 +190,22 @@ describe("computeDifferential", () => {
     expect(top.contributingFeatures[0]).toContain("Fever");
   });
 
+  it("lets strong multi-finding evidence overcome a prior disadvantage", () => {
+    // Regression: with mean-normalized LRs, a rare condition strongly
+    // explaining five findings lost to a common condition weakly explaining
+    // one. sqrt normalization rewards breadth of explanation.
+    const findings = ["F1", "F2", "F3", "F4", "F5"].map(l => addFinding("p1", l));
+    seedKB(
+      [mkCondition("RareSpecific", { prior_base: 0.01 }), mkCondition("CommonVague", { prior_base: 0.1 })],
+      [
+        ...findings.map(f => ({ condition_id: "RareSpecific", feature_id: f, lr_present: 4.0, lr_absent: 0.5 })),
+        { condition_id: "CommonVague", feature_id: findings[0], lr_present: 1.5, lr_absent: 0.9 },
+      ]
+    );
+    const out = computeDifferential("p1");
+    expect(out.results[0].label).toBe("RareSpecific");
+  });
+
   it("reports a positive run duration", () => {
     const f1 = addFinding("p1", "Fever");
     seedKB(
