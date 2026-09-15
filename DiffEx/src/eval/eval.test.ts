@@ -7,7 +7,7 @@ describe("vignette evaluation", () => {
   const report = runEval();
   logSpy.mockRestore();
 
-  // eslint-disable-next-line no-console
+   
   console.log(formatReport(report));
 
   it("every expected diagnosis exists in the knowledge base", () => {

@@ -52,7 +52,7 @@ export function processAIFindings(
     usedLabels.add(labelKey);
 
     // Try to match existing feature first
-    let feature = findFeatureByLabelOrSynonym(finding.term);
+    const feature = findFeatureByLabelOrSynonym(finding.term);
     let featureId: string;
     let label: string;
     let confidence: number;

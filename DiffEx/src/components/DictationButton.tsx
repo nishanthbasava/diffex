@@ -15,10 +15,14 @@ interface SpeechRecognitionEvent extends Event {
 
 export function DictationButton({ onTranscript }: DictationButtonProps) {
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const getSpeechRecognition = useCallback(() => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const w = window as Window & {
+      SpeechRecognition?: new () => SpeechRecognition;
+      webkitSpeechRecognition?: new () => SpeechRecognition;
+    };
+    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
     if (!SR) return null;
     return new SR();
   }, []);
@@ -54,7 +58,7 @@ export function DictationButton({ onTranscript }: DictationButtonProps) {
       }
     };
 
-    recognition.onerror = (e: any) => {
+    recognition.onerror = (e: SpeechRecognitionErrorEvent) => {
       if (e.error !== 'aborted') {
         toast.error(`Mic error: ${e.error}`);
       }

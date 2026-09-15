@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 
-const env = fs.readFileSync('.env', 'utf-8').split('\n').reduce((a: any, l: string) => {
+const env = fs.readFileSync('.env', 'utf-8').split('\n').reduce((a: Record<string, string>, l: string) => {
   const m = l.match(/^([^=]+)=["']?([^"'\n]*)["']?/);
   if (m) a[m[1].trim()] = m[2].trim();
   return a;
@@ -25,16 +25,16 @@ async function main() {
   console.log([...(exudateFeatures ?? []), ...(tonsilFeatures ?? [])]);
 
   // 2. What conditions have edges to throat features
-  const throatIds = (throatFeatures ?? []).map((f: any) => f.id);
+  const throatIds = (throatFeatures ?? []).map((f: { id: string }) => f.id);
   if (throatIds.length > 0) {
     const { data: throatEdges } = await sb
       .from('condition_feature_edges')
       .select('condition_id, feature_id')
       .in('feature_id', throatIds);
-    const condIds = [...new Set((throatEdges ?? []).map((e: any) => e.condition_id))];
+    const condIds = [...new Set((throatEdges ?? []).map((e: { condition_id: string }) => e.condition_id))];
     const { data: conds } = await sb.from('conditions').select('label').in('id', condIds);
     console.log('\n=== Conditions with sore throat edges ===');
-    console.log(conds?.map((c: any) => c.label));
+    console.log(conds?.map((c: { label: string }) => c.label));
   }
 
   // 3. Total counts

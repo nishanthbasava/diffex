@@ -17,7 +17,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // ---- Load .env manually (no dotenv needed) ----
 function loadEnv(): Record<string, string> {
@@ -128,7 +128,7 @@ function mapFeatureType(findingType: string): string {
 
 // ---- Batch upsert helper ----
 const BATCH_SIZE = 200;
-async function batchUpsert(supabase: any, table: string, rows: object[], onConflict: string): Promise<void> {
+async function batchUpsert(supabase: SupabaseClient, table: string, rows: object[], onConflict: string): Promise<void> {
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const batch = rows.slice(i, i + BATCH_SIZE);
     const { error } = await supabase.from(table).upsert(batch, { onConflict, ignoreDuplicates: false });
@@ -183,7 +183,7 @@ async function main() {
     synonyms: string[];
   }>();
 
-  const conditionRows: object[] = [];
+  const conditionRows: { id: string; label: string; category: string; acuteness: number; prior_base: number }[] = [];
   const edgeRows: { condition_label: string; feature_label: string; lr_present: number; lr_absent: number }[] = [];
 
   let skipped = 0;
@@ -197,7 +197,10 @@ async function main() {
 
     if (!name || !rawJson) { skipped++; continue; }
 
-    let output: any;
+    let output: {
+      acuity_score?: number;
+      acute_findings?: { finding_name?: string; finding_type?: string; LR_positive?: number; LR_negative?: number }[];
+    };
     try {
       output = JSON.parse(rawJson);
     } catch {
@@ -218,9 +221,9 @@ async function main() {
       prior_base,
     });
 
-    const findings: any[] = output.acute_findings ?? [];
+    const findings = output.acute_findings ?? [];
     for (const f of findings) {
-      const label: string = f.finding_name?.trim();
+      const label = f.finding_name?.trim();
       if (!label) continue;
       const key = label.toLowerCase().trim();
 
@@ -248,7 +251,7 @@ async function main() {
 
   // ---- Deduplicate conditions by label ----
   const uniqueConditions = Array.from(
-    new Map((conditionRows as any[]).map(c => [c.label.toLowerCase(), c])).values()
+    new Map(conditionRows.map(c => [c.label.toLowerCase(), c])).values()
   );
 
   // ---- Upsert features ----
@@ -257,7 +260,7 @@ async function main() {
   const { data: existingFeatures, error: exFErr } = await supabase.from('features').select('canonical_label');
   if (exFErr) throw new Error('Failed to fetch existing features: ' + JSON.stringify(exFErr));
   const existingFeatureLabels = new Set(
-    (existingFeatures ?? []).map((f: any) => f.canonical_label.toLowerCase().trim())
+    (existingFeatures ?? []).map((f: { canonical_label: string }) => f.canonical_label.toLowerCase().trim())
   );
 
   process.stdout.write('Upserting features ');
@@ -278,7 +281,7 @@ async function main() {
   const { data: dbFeatures, error: fErr } = await supabase.from('features').select('id, canonical_label');
   if (fErr) throw fErr;
   const featureLabelToId = new Map<string, string>(
-    (dbFeatures ?? []).map((f: any) => [f.canonical_label.toLowerCase().trim(), f.id])
+    (dbFeatures ?? []).map((f: { canonical_label: string; id: string }) => [f.canonical_label.toLowerCase().trim(), f.id])
   );
 
   // ---- Upsert conditions (insert new, update prior_base/acuteness/category on existing) ----
@@ -291,7 +294,7 @@ async function main() {
   const { data: dbConditions, error: cErr } = await supabase.from('conditions').select('id, label');
   if (cErr) throw cErr;
   const condLabelToId = new Map<string, string>(
-    (dbConditions ?? []).map((c: any) => [c.label.toLowerCase().trim(), c.id])
+    (dbConditions ?? []).map((c: { label: string; id: string }) => [c.label.toLowerCase().trim(), c.id])
   );
 
   // ---- Build and upsert edges ----

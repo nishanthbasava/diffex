@@ -13,6 +13,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { getConditions, getAllEdges } from './differentialStore';
 import { getAllFeatures } from './evidenceStore';
 
@@ -25,7 +26,8 @@ async function batchUpsert(
 ): Promise<void> {
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const batch = rows.slice(i, i + BATCH_SIZE);
-    const { error } = await (supabase.from(table) as any).upsert(batch, {
+    // Dynamic table name: fall back to the untyped client interface
+    const { error } = await (supabase as SupabaseClient).from(table).upsert(batch, {
       onConflict,
       ignoreDuplicates: false,
     });

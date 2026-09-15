@@ -1,4 +1,4 @@
-1/**
+/**
  * knowledgeCache.ts
  *
  * Supabase-backed in-memory cache for conditions and edges.
@@ -144,7 +144,7 @@ export async function refreshCacheForEvidence(featureLabels: string[]): Promise<
     // can match patient evidence (localStorage IDs) to edges (Supabase IDs)
     // by label instead of ID.
     const edgeFeatureIds = [...new Set((edges ?? []).map((e: { feature_id: string }) => e.feature_id))];
-    let featureLabelMap = new Map<string, string>();
+    const featureLabelMap = new Map<string, string>();
     if (edgeFeatureIds.length > 0) {
       const { data: featRows, error: featErr } = await supabase
         .from('features')

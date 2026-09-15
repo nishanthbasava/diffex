@@ -87,7 +87,6 @@ export function computeVOIForFeature(
       const edge = edgesByCondition.get(p.condition_id);
 
       // Get LR for this outcome
-      let lr: number;
       let lrPresent: number;
       let lrAbsent: number;
 
@@ -100,7 +99,7 @@ export function computeVOIForFeature(
         lrAbsent = 1.0;
       }
 
-      lr = outcome === 'present' ? lrPresent : lrAbsent;
+      const lr = outcome === 'present' ? lrPresent : lrAbsent;
 
       // P(o|d) = LR(d,o) / (LR(d,present) + LR(d,absent))
       const pOutcomeGivenD = lr / (lrPresent + lrAbsent);
