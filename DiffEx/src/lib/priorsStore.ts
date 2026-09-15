@@ -2,7 +2,10 @@ import { getConditions } from './differentialStore';
 import type { PatientEvidenceJoined } from './evidenceStore';
 
 const PRIORS_KEY = 'diffex_priors';
-const PRIORS_SEEDED_KEY = 'diffex_priors_seeded_v1';
+// v2: fixed 'Renal Colic' → 'Nephrolithiasis' label mismatch, added missing
+// Hepatitis and IBD rows. Bumping the key re-runs the seed on existing
+// installs; the seed merges so user-edited rows are preserved.
+const PRIORS_SEEDED_KEY = 'diffex_priors_seeded_v2';
 
 // ---- Types ----
 
@@ -235,7 +238,9 @@ export function seedPriorsIfEmpty(): void {
     { condition_id: id('GI Bleed'), base_prevalence: UNCOMMON, age_multipliers: AGE_ADULT({n:0.1,i:0.1,c:0.2,a:0.3,y:0.7,m:1.2,o:2.0}), sex_multipliers: { male: 1.2, female: 0.9, unknown: 1.0 }, smoking_multipliers: SMOKE_NEUTRAL, notes: 'Increases with age' },
     { condition_id: id('Mesenteric Ischemia'), base_prevalence: VERY_RARE, age_multipliers: AGE_ADULT({n:0.01,i:0.01,c:0.01,a:0.05,y:0.3,m:1.0,o:3.0}), sex_multipliers: SEX_NEUTRAL, smoking_multipliers: { smoker: 1.5, non_smoker: 1.0, unknown: 1.0 }, notes: 'Primarily elderly' },
     { condition_id: id('Bowel Perforation'), base_prevalence: VERY_RARE, age_multipliers: AGE_ADULT({n:0.2,i:0.1,c:0.1,a:0.2,y:0.7,m:1.2,o:2.0}), sex_multipliers: SEX_NEUTRAL, smoking_multipliers: SMOKE_NEUTRAL, notes: 'Rare; increases with age' },
-    { condition_id: id('Renal Colic'), base_prevalence: UNCOMMON, age_multipliers: AGE_ADULT({n:0.01,i:0.01,c:0.1,a:0.3,y:1.2,m:1.3,o:0.8}), sex_multipliers: { male: 1.5, female: 0.7, unknown: 1.0 }, smoking_multipliers: SMOKE_NEUTRAL, notes: 'Peak 20-50y; male predominance' },
+    { condition_id: id('Nephrolithiasis'), base_prevalence: UNCOMMON, age_multipliers: AGE_ADULT({n:0.01,i:0.01,c:0.1,a:0.3,y:1.2,m:1.3,o:0.8}), sex_multipliers: { male: 1.5, female: 0.7, unknown: 1.0 }, smoking_multipliers: SMOKE_NEUTRAL, notes: 'Peak 20-50y; male predominance' },
+    { condition_id: id('Hepatitis'), base_prevalence: UNCOMMON, age_multipliers: AGE_ADULT({n:0.3,i:0.3,c:0.4,a:0.6,y:1.2,m:1.2,o:0.8}), sex_multipliers: { male: 1.2, female: 0.9, unknown: 1.0 }, smoking_multipliers: SMOKE_NEUTRAL, notes: 'Peak in adults' },
+    { condition_id: id('Inflammatory Bowel Disease'), base_prevalence: UNCOMMON, age_multipliers: AGE_ADULT({n:0.05,i:0.1,c:0.3,a:0.8,y:1.5,m:1.0,o:0.7}), sex_multipliers: SEX_NEUTRAL, smoking_multipliers: SMOKE_NEUTRAL, notes: 'Peak onset 15-35y' },
     { condition_id: id('Pyelonephritis'), base_prevalence: UNCOMMON, age_multipliers: AGE_ADULT({n:0.3,i:0.5,c:0.5,a:0.7,y:1.2,m:1.0,o:1.3}), sex_multipliers: { male: 0.5, female: 1.5, unknown: 1.0 }, smoking_multipliers: SMOKE_NEUTRAL, notes: 'Female predominance' },
     { condition_id: id('UTI'), base_prevalence: COMMON, age_multipliers: AGE_ADULT({n:0.3,i:0.5,c:0.5,a:0.7,y:1.2,m:1.0,o:1.5}), sex_multipliers: { male: 0.3, female: 1.5, unknown: 1.0 }, smoking_multipliers: SMOKE_NEUTRAL, notes: 'Strong female predominance' },
 
@@ -294,7 +299,12 @@ export function seedPriorsIfEmpty(): void {
 
   // Filter out rows with empty condition_id (condition not found)
   const validRows = rows.filter(r => r.condition_id !== '');
-  savePriors(validRows);
+  // Merge instead of overwrite: keep existing (possibly user-edited) rows and
+  // only fill gaps, so reseeding after a version bump preserves edits.
+  const existing = loadPriors();
+  const existingIds = new Set(existing.map(p => p.condition_id));
+  const merged = [...existing, ...validRows.filter(r => !existingIds.has(r.condition_id))];
+  savePriors(merged);
   localStorage.setItem(PRIORS_SEEDED_KEY, 'true');
-  console.log(`[DiffEx] Seeded ${validRows.length} prior rows`);
+  console.log(`[DiffEx] Seeded ${merged.length - existing.length} new prior rows (${merged.length} total)`);
 }
