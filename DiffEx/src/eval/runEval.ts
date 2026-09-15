@@ -72,14 +72,22 @@ function loadVignetteAsPatient(v: Vignette): { patientId: string; unmapped: stri
   return { patientId, unmapped };
 }
 
-/** Rank of the expected label when conditions are ordered by prior weight alone. */
+/** Best (lowest) rank among a vignette's accepted labels; null if none ranked. */
+function bestRank(labels: string[], accepted: string[]): number | null {
+  const ranks = accepted
+    .map(a => labels.indexOf(a))
+    .filter(i => i >= 0)
+    .map(i => i + 1);
+  return ranks.length > 0 ? Math.min(...ranks) : null;
+}
+
+/** Rank of the expected diagnosis when conditions are ordered by prior weight alone. */
 function baselineRankFor(v: Vignette, patientId: string): number | null {
   const evidence = getPatientEvidence(patientId);
   const ranked = getConditions()
     .map(c => ({ label: c.label, prior: getPriorWeightBreakdown(c.id, evidence, c.prior_base).prior_weight }))
     .sort((a, b) => b.prior - a.prior);
-  const idx = ranked.findIndex(r => r.label === v.expected);
-  return idx >= 0 ? idx + 1 : null;
+  return bestRank(ranked.map(r => r.label), v.expected);
 }
 
 export function runEval(): EvalReport {
@@ -88,17 +96,16 @@ export function runEval(): EvalReport {
 
   const conditionLabels = new Set(getConditions().map(c => c.label));
   const missingConditions = [...new Set(
-    VIGNETTES.filter(v => !conditionLabels.has(v.expected)).map(v => v.expected)
+    VIGNETTES.flatMap(v => v.expected).filter(label => !conditionLabels.has(label))
   )];
 
   const results: VignetteResult[] = VIGNETTES.map(v => {
     const { patientId, unmapped } = loadVignetteAsPatient(v);
     const output = computeDifferential(patientId);
-    const idx = output.results.findIndex(r => r.label === v.expected);
     return {
       id: v.id,
-      expected: v.expected,
-      engineRank: idx >= 0 ? idx + 1 : null,
+      expected: v.expected[0],
+      engineRank: bestRank(output.results.map(r => r.label), v.expected),
       baselineRank: baselineRankFor(v, patientId),
       topLabel: output.results[0]?.label ?? '(none)',
       durationMs: output.durationMs,
