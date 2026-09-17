@@ -69,7 +69,6 @@ export default function Index() {
     refreshCacheForEvidence(featureLabels).then(() => {
       setCacheVersion(v => v + 1);
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [evidenceVersion, patientId]);
 
   // Compute evidence-based differential.

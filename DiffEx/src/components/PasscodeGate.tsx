@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lock } from 'lucide-react';
 
-const PASSCODE = import.meta.env.VITE_APP_PASSCODE ?? 'DifferentialExpander2026';
+// Fail closed: with no passcode configured, only dev builds are accessible.
+const PASSCODE = import.meta.env.VITE_APP_PASSCODE ?? (import.meta.env.DEV ? 'dev' : null);
 const SESSION_KEY = 'diffex_unlocked';
 
 export function PasscodeGate({ children }: { children: React.ReactNode }) {
@@ -17,7 +18,7 @@ export function PasscodeGate({ children }: { children: React.ReactNode }) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (input === PASSCODE) {
+    if (PASSCODE !== null && input === PASSCODE) {
       sessionStorage.setItem(SESSION_KEY, 'true');
       setUnlocked(true);
     } else {
