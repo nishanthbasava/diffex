@@ -1,5 +1,5 @@
 import type { PatientEvidence, ExtractionCandidate } from '@/types/evidence';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, isSupabaseConfigured } from '@/integrations/supabase/client';
 import {
   findFeatureByLabelOrSynonym,
   upsertFeature,
@@ -21,6 +21,10 @@ interface AIFinding {
  * Returns structured findings that can be registered into the evidence store.
  */
 export async function extractWithAI(noteText: string): Promise<AIFinding[]> {
+  if (!isSupabaseConfigured) {
+    console.warn('[DiffEx AI] Supabase not configured — AI extraction unavailable');
+    return [];
+  }
   const vocabulary = buildVocabularyPrompt();
   const { data, error } = await supabase.functions.invoke('extract-clinical-terms', {
     body: { noteText, vocabulary },
