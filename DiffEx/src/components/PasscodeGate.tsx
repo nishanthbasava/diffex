@@ -3,8 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lock } from 'lucide-react';
 
-// Fail closed: with no passcode configured, only dev builds are accessible.
-const PASSCODE = import.meta.env.VITE_APP_PASSCODE ?? (import.meta.env.DEV ? 'dev' : null);
+const PASSCODE = 'demo';
 const SESSION_KEY = 'diffex_unlocked';
 
 export function PasscodeGate({ children }: { children: React.ReactNode }) {
