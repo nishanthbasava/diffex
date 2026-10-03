@@ -17,6 +17,7 @@ import { refreshCacheForEvidence } from '@/lib/knowledgeCache';
 import { seedSupabaseIfEmpty } from '@/lib/supabaseSeed';
 import { computeDifferential } from '@/lib/computeDifferential';
 import { demoPatient, demoFindings, features } from '@/data/knowledgeBase';
+import { DEMO_REQUEST_KEY } from '@/components/PasscodeGate';
 import type { PatientData, ChangeLogEntry, SuggestedQuestion, SuggestedTest } from '@/types';
 import type { RegistryFeature } from '@/types/evidence';
 import { toast } from 'sonner';
@@ -227,6 +228,14 @@ export default function Index() {
     setChangeLog([]);
     setDemoFindingIndex(0);
   }, []);
+
+  // Auto-load the demo case when the user chose "Try a sample case" on the gate
+  useEffect(() => {
+    if (sessionStorage.getItem(DEMO_REQUEST_KEY) === 'true') {
+      sessionStorage.removeItem(DEMO_REQUEST_KEY);
+      loadDemo();
+    }
+  }, [loadDemo]);
 
   const reset = useCallback(() => {
     // Wipe and reseed knowledge base

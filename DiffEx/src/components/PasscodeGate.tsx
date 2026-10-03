@@ -5,6 +5,8 @@ import { Lock } from 'lucide-react';
 
 const PASSCODE = 'demo';
 const SESSION_KEY = 'diffex_unlocked';
+// When set, Index auto-loads the demo case after unlock.
+export const DEMO_REQUEST_KEY = 'diffex_demo_request';
 
 export function PasscodeGate({ children }: { children: React.ReactNode }) {
   const [unlocked, setUnlocked] = useState(
@@ -14,6 +16,12 @@ export function PasscodeGate({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState(false);
 
   if (unlocked) return <>{children}</>;
+
+  function handleTrySample() {
+    sessionStorage.setItem(SESSION_KEY, 'true');
+    sessionStorage.setItem(DEMO_REQUEST_KEY, 'true');
+    setUnlocked(true);
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,6 +61,19 @@ export function PasscodeGate({ children }: { children: React.ReactNode }) {
           )}
           <Button type="submit" className="w-full">Unlock</Button>
         </form>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-card px-2 text-muted-foreground">or</span>
+          </div>
+        </div>
+
+        <Button type="button" variant="outline" className="w-full" onClick={handleTrySample}>
+          Try a sample case
+        </Button>
       </div>
     </div>
   );
