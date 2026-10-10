@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Import, X, Check, ChevronDown, Zap, TrendingDown, DollarSign, Clock, Shield } from 'lucide-react';
+import { Import, X, Check, ChevronDown, DollarSign, Clock, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -24,13 +24,6 @@ const testToLabResults: Record<string, string[]> = {
   cbc: ['low_hgb', 'elevated_wbc'],
 };
 
-/** Maps 0-100% to a red→yellow→green HSL color */
-function percentToColor(pct: number): string {
-  // 0% → hue 0 (red), 50% → hue 45 (yellow-orange), 100% → hue 142 (green)
-  const clamped = Math.max(0, Math.min(100, pct));
-  const hue = (clamped / 100) * 142;
-  return `hsl(${hue}, 65%, 42%)`;
-}
 
 export function OptimizerTab({ items, onAddQuestion, onAbsentQuestion, onAddTest }: OptimizerTabProps) {
   const [resultPickerOpen, setResultPickerOpen] = useState(false);
@@ -92,7 +85,7 @@ export function OptimizerTab({ items, onAddQuestion, onAbsentQuestion, onAddTest
 
   return (
     <>
-      <div className="space-y-3">
+      <div className="border-t border-border">
         {items.map(item => {
           const isExpanded = expandedId === item.id;
           const isQuestion = item.type === 'question';
@@ -102,29 +95,29 @@ export function OptimizerTab({ items, onAddQuestion, onAbsentQuestion, onAddTest
           return (
             <div
               key={item.id}
-              className="suggestion-card animate-slide-in group"
+              className="border-b border-border border-l-2 border-l-next-step pl-2 pr-1 py-1.5 group"
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-1.5 mb-0.5">
                     <Badge
                       variant={isQuestion ? 'secondary' : 'outline'}
-                      className="text-[10px] px-1.5 py-0 shrink-0"
+                      className="text-[10px] px-1 py-0 rounded-sm shrink-0"
                     >
                       {isQuestion ? 'Q' : 'T'}
                     </Badge>
                     <h4 className="font-medium text-sm text-foreground truncate group-hover:whitespace-normal group-hover:overflow-visible">{item.title}</h4>
                   </div>
-                  <div className="flex items-center gap-3 text-xs mt-0.5">
-                    <span className="text-muted-foreground">
-                      Differential Cut: <span style={{ color: percentToColor(item.cutdownPercent) }} className="font-semibold">{item.cutdownPercent}%</span>
+                  <div className="flex items-center gap-3 text-xs mt-0.5 text-muted-foreground">
+                    <span>
+                      Differential cut <span className="num font-medium text-foreground">{item.cutdownPercent}%</span>
                     </span>
-                    <span className="text-muted-foreground">
-                      Priority: <span style={{ color: percentToColor(item.priorityScore) }} className="font-semibold">{item.priorityScore}%</span>
+                    <span>
+                      Priority <span className="num font-medium text-foreground">{item.priorityScore}%</span>
                     </span>
                   </div>
                   {imported && (
-                    <div className="flex items-center gap-1.5 mt-1.5 text-xs text-[hsl(var(--success))]">
+                    <div className="flex items-center gap-1.5 mt-1 text-xs text-evidence-for">
                       <Check className="w-3 h-3" />
                       <span>Result imported</span>
                       <button
@@ -141,10 +134,10 @@ export function OptimizerTab({ items, onAddQuestion, onAbsentQuestion, onAddTest
                     // Yes/No buttons like SuggestionCard
                     answered ? (
                       <span className={cn(
-                        "text-xs font-medium px-2.5 py-1 rounded-full",
+                        "text-xs font-medium px-2 py-0.5 rounded-sm border",
                         answered === 'yes'
-                          ? "bg-[hsl(var(--success))]/15 text-[hsl(var(--success))]"
-                          : "bg-muted text-muted-foreground"
+                          ? "border-[hsl(152,40%,74%)] bg-evidence-for-bg text-evidence-for"
+                          : "bg-muted text-muted-foreground border-border"
                       )}>
                         {answered === 'yes' ? 'Yes' : 'No'}
                       </span>
@@ -157,7 +150,7 @@ export function OptimizerTab({ items, onAddQuestion, onAbsentQuestion, onAddTest
                           }}
                           size="sm"
                           variant="ghost"
-                          className="h-7 px-2.5 text-xs font-medium rounded-full bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] hover:bg-[hsl(var(--success))]/20"
+                          className="h-6 px-2 text-xs font-medium rounded-sm border border-[hsl(152,40%,74%)] bg-evidence-for-bg text-evidence-for hover:bg-evidence-for-bg hover:text-evidence-for hover:brightness-95"
                         >
                           Yes
                         </Button>
@@ -168,7 +161,7 @@ export function OptimizerTab({ items, onAddQuestion, onAbsentQuestion, onAddTest
                           }}
                           size="sm"
                           variant="ghost"
-                          className="h-7 px-2.5 text-xs font-medium rounded-full bg-muted text-muted-foreground hover:bg-muted/80"
+                          className="h-6 px-2 text-xs font-medium rounded-sm border border-border bg-muted text-muted-foreground hover:bg-muted/80"
                         >
                           No
                         </Button>
@@ -188,8 +181,9 @@ export function OptimizerTab({ items, onAddQuestion, onAbsentQuestion, onAddTest
                         onClick={() => fileRefs.current[item.id]?.click()}
                         size="sm"
                         variant="ghost"
-                        className="h-7 w-7 p-0 opacity-60 hover:opacity-100 hover:text-primary"
+                        className="h-6 w-6 p-0 rounded-sm opacity-60 hover:opacity-100 hover:text-next-step"
                         disabled={importingId === item.id}
+                        title="Import result file"
                       >
                         <Import className="w-3.5 h-3.5" />
                       </Button>
@@ -197,7 +191,7 @@ export function OptimizerTab({ items, onAddQuestion, onAbsentQuestion, onAddTest
                         onClick={() => handleTestClick(item)}
                         size="sm"
                         variant="ghost"
-                        className="shrink-0 h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
+                        className="shrink-0 h-6 w-6 p-0 rounded-sm hover:bg-next-step-bg hover:text-next-step"
                       >
                         +
                       </Button>
