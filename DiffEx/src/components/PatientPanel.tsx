@@ -8,7 +8,6 @@ import { FileUploadArea } from './FileUploadArea';
 import { EvidencePanel } from './EvidencePanel';
 import { FeatureRegistryDialog } from './FeatureRegistryDialog';
 import { DictationButton } from './DictationButton';
-import { User, RotateCcw, PlayCircle, Plus, Zap } from 'lucide-react';
 import type { PatientData } from '@/types';
 import type { ExtractionCandidate, PatientEvidence, RegistryFeature } from '@/types/evidence';
 import { features } from '@/data/knowledgeBase';
@@ -149,23 +148,22 @@ export function PatientPanel({
   return (
     <div className="panel h-full flex flex-col">
       <div className="panel-header flex items-center gap-2">
-        <User className="w-5 h-5 text-primary" />
-        <h2 className="font-semibold text-lg flex-1">Patient</h2>
+        <h2 className="font-semibold text-sm flex-1">Patient</h2>
         <FeatureRegistryDialog registry={registry} onRegistryChange={handleRegistryChange} />
       </div>
 
-      <div className="panel-content flex-1 flex flex-col gap-5 overflow-auto">
-        {/* Patient Story */}
-        <div className="space-y-1.5 flex-1 flex flex-col min-h-0">
+      <div className="panel-content flex-1 flex flex-col gap-3 overflow-auto">
+        {/* Clinical Note */}
+        <div className="space-y-1 flex-1 flex flex-col min-h-0">
           <div className="flex items-center justify-between">
-            <Label htmlFor="story" className="text-sm text-muted-foreground">Patient Story</Label>
+            <Label htmlFor="story" className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">Clinical Note</Label>
             <DictationButton onTranscript={(text) => onPatientDataChange({ ...patientData, story: patientData.story + (patientData.story ? ' ' : '') + text })} />
           </div>
           <Textarea
             id="story"
             value={patientData.story}
             onChange={(e) => onPatientDataChange({ ...patientData, story: e.target.value })}
-            placeholder="Enter patient presentation, history, symptoms..."
+            placeholder="HPI, PMH, meds, social history…"
             className="flex-1 min-h-[100px] resize-none text-sm"
           />
         </div>
@@ -185,7 +183,6 @@ export function PatientPanel({
           className="w-full"
           disabled={isExtracting || !patientData.story.trim()}
         >
-          <Zap className={`w-4 h-4 mr-1.5 ${isExtracting ? 'animate-spin' : ''}`} />
           {isExtracting ? 'Processing…' : 'Process Note'}
         </Button>
 
@@ -208,18 +205,15 @@ export function PatientPanel({
         {/* Action Buttons */}
         <div className="flex gap-2">
           <Button onClick={onLoadDemo} variant="secondary" size="sm" className="flex-1">
-            <PlayCircle className="w-4 h-4 mr-1.5" />
             Load Demo
           </Button>
           <Button onClick={onReset} variant="outline" size="sm" className="flex-1">
-            <RotateCcw className="w-4 h-4 mr-1.5" />
             Reset
           </Button>
         </div>
 
         {hasNextFinding && (
           <Button onClick={onAddNextFinding} variant="default" size="sm" className="w-full">
-            <Plus className="w-4 h-4 mr-1.5" />
             Add Next Finding
           </Button>
         )}
