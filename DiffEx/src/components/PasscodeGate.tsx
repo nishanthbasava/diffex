@@ -36,9 +36,9 @@ export function PasscodeGate({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-sm space-y-6 p-8 border border-border rounded-xl bg-card shadow-sm">
+      <div className="w-full max-w-sm space-y-6 p-8 border border-border rounded-sm bg-card">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+          <div className="w-10 h-10 rounded-sm bg-primary flex items-center justify-center">
             <Lock className="w-5 h-5 text-primary-foreground" />
           </div>
           <div className="text-center">

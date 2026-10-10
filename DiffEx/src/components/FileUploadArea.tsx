@@ -127,7 +127,7 @@ export function FileUploadArea({ onTextExtracted, autoAppend, onAutoAppendChange
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         className={cn(
-          "border-2 border-dashed rounded-lg p-4 text-center transition-colors cursor-pointer",
+          "border border-dashed rounded-sm p-3 text-center transition-colors cursor-pointer",
           isDragging 
             ? "border-primary bg-primary/5" 
             : "border-border hover:border-primary/50"
