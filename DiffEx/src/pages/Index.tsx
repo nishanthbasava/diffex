@@ -22,7 +22,7 @@ import type { PatientData, ChangeLogEntry, SuggestedQuestion, SuggestedTest } fr
 import type { RegistryFeature } from '@/types/evidence';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Bug, RotateCcw } from 'lucide-react';
+import { PatientBanner } from '@/components/PatientBanner';
 
 const emptyPatient: PatientData = {
   story: '',
@@ -280,30 +280,29 @@ export default function Index() {
     <div className="min-h-screen flex flex-col bg-background">
       <DisclaimerBanner />
 
-      <header className="border-b border-border bg-card px-6 py-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-semibold text-sm">Dx</span>
-          </div>
-          <div>
-            <h1 className="text-base font-semibold text-foreground leading-tight">DiffEx</h1>
-            <p className="text-xs text-muted-foreground">Differential Expander</p>
-          </div>
-          <div className="ml-auto flex items-center gap-1.5">
-            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={handleDebugEvidence}>
-              <Bug className="w-3.5 h-3.5 mr-1" />
+      <header className="border-b border-border bg-card px-4 py-1.5">
+        <div className="flex items-center gap-2">
+          <h1 className="text-sm font-semibold text-foreground leading-tight">DiffEx</h1>
+          <span className="text-xs text-muted-foreground">Differential Expander</span>
+          <div className="ml-auto flex items-center gap-1">
+            <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-muted-foreground" onClick={handleDebugEvidence}>
               Add Sample Evidence
             </Button>
-            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={reset}>
-              <RotateCcw className="w-3.5 h-3.5 mr-1" />
+            <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-muted-foreground" onClick={reset}>
               Reset
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 p-6 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_380px] gap-5 h-full min-h-[500px]">
+      <PatientBanner
+        patientData={patientData}
+        patientId={patientId}
+        evidenceVersion={evidenceVersion}
+      />
+
+      <main className="flex-1 p-3 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_360px] gap-3 h-full min-h-[500px]">
           <PatientPanel
             patientData={patientData}
             selectedFeatureIds={selectedFeatureIds}
