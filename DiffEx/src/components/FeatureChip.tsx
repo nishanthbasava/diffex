@@ -22,7 +22,7 @@ export function FeatureChip({ featureId, onRemove, showRemove = true }: FeatureC
   const typeClass = typeClasses[feature.type] || 'chip-symptom';
 
   return (
-    <span className={`chip ${typeClass} animate-fade-in`}>
+    <span className={`chip ${typeClass}`}>
       <span>{feature.name}</span>
       {showRemove && onRemove && (
         <button
@@ -30,7 +30,7 @@ export function FeatureChip({ featureId, onRemove, showRemove = true }: FeatureC
           className="ml-1 hover:opacity-70 transition-opacity"
           aria-label={`Remove ${feature.name}`}
         >
-          <X className="w-3.5 h-3.5" />
+          <X className="w-3 h-3" />
         </button>
       )}
     </span>

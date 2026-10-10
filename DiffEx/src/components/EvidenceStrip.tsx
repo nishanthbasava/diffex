@@ -46,18 +46,18 @@ export function EvidenceStrip({
   };
 
   return (
-    <div className="bg-card border-t border-border px-6 py-4">
-      <div className="flex items-start gap-6 overflow-x-auto">
-        <span className="text-sm font-medium text-muted-foreground shrink-0 pt-1">
+    <div className="bg-card border-t border-border px-4 py-1.5">
+      <div className="flex items-start gap-4 overflow-x-auto">
+        <span className="text-[10px] uppercase tracking-wide font-semibold text-muted-foreground shrink-0 pt-0.5">
           Active Evidence
         </span>
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
           {Object.entries(grouped).map(([type, ids]) => (
-            <div key={type} className="flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <div key={type} className="flex items-center gap-1.5">
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
                 {typeLabels[type] || type}:
               </span>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1">
                 {ids.map(id => (
                   <FeatureChip
                     key={id}
