@@ -120,11 +120,12 @@ export function DifferentialPanel({
   );
 
   return (
-    <div className="panel h-full flex flex-col">
+    <div className="panel h-full flex flex-col" data-tour="differential">
       <div className="panel-header flex items-center gap-2">
         <h2 className="font-semibold text-sm">Differential</h2>
         <span className="ml-auto" />
 
+        <div className="flex items-center gap-2" data-tour="differential-tools">
         {/* Focused / Show All segmented toggle */}
         <div className="flex items-center rounded-sm border border-border bg-muted/60 p-px text-xs gap-px">
           <button
@@ -182,6 +183,7 @@ export function DifferentialPanel({
           selectedFeatureIds={selectedFeatureIds}
           testResultIds={testResultIds}
         />
+        </div>
       </div>
 
       <PriorsEditorDialog

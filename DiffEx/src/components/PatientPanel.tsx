@@ -154,7 +154,7 @@ export function PatientPanel({
 
       <div className="panel-content flex-1 flex flex-col gap-3 overflow-auto">
         {/* Clinical Note */}
-        <div className="space-y-1 flex-1 flex flex-col min-h-0">
+        <div className="space-y-1 flex-1 flex flex-col min-h-0" data-tour="clinical-note">
           <div className="flex items-center justify-between">
             <Label htmlFor="story" className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">Clinical Note</Label>
             <DictationButton onTranscript={(text) => onPatientDataChange({ ...patientData, story: patientData.story + (patientData.story ? ' ' : '') + text })} />
@@ -213,7 +213,7 @@ export function PatientPanel({
         </div>
 
         {hasNextFinding && (
-          <Button onClick={onAddNextFinding} variant="default" size="sm" className="w-full">
+          <Button onClick={onAddNextFinding} variant="default" size="sm" className="w-full" data-tour="add-next-finding">
             Add Next Finding
           </Button>
         )}

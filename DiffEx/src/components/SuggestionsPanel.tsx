@@ -23,7 +23,7 @@ export function SuggestionsPanel({
   onAddTest,
 }: SuggestionsPanelProps) {
   return (
-    <div className="panel h-full flex flex-col">
+    <div className="panel h-full flex flex-col" data-tour="suggestions">
       <div className="panel-header flex items-center gap-2">
         <h2 className="font-semibold text-sm">Suggestions</h2>
       </div>
