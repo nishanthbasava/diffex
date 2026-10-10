@@ -23,6 +23,7 @@ import type { RegistryFeature } from '@/types/evidence';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { PatientBanner } from '@/components/PatientBanner';
+import { DemoGuide } from '@/components/DemoGuide';
 
 const emptyPatient: PatientData = {
   story: '',
@@ -36,6 +37,8 @@ export default function Index() {
   const [testResultIds, setTestResultIds] = useState<string[]>([]);
   const [changeLog, setChangeLog] = useState<ChangeLogEntry[]>([]);
   const [demoFindingIndex, setDemoFindingIndex] = useState(0);
+  // Guided demo tour step; null = tour not active
+  const [demoTourStep, setDemoTourStep] = useState<number | null>(null);
   const [resetKey, setResetKey] = useState(0);
   const [registry, setRegistry] = useState<RegistryFeature[]>(() => loadRegistry());
   const [patientId] = useState(() => `patient_${Date.now()}`);
@@ -227,6 +230,7 @@ export default function Index() {
     setTestResultIds([]);
     setChangeLog([]);
     setDemoFindingIndex(0);
+    setDemoTourStep(0);
   }, []);
 
   // Auto-load the demo case when the user chose "Try a sample case" on the gate
@@ -248,6 +252,7 @@ export default function Index() {
     setTestResultIds([]);
     setChangeLog([]);
     setDemoFindingIndex(0);
+    setDemoTourStep(null);
     setResetKey(k => k + 1);
     setEvidenceVersion(v => v + 1);
   }, []);
@@ -261,6 +266,17 @@ export default function Index() {
   }, [demoFindingIndex, addFeature]);
 
   const hasNextFinding = selectedFeatureIds.length > 0 && demoFindingIndex < demoFindings.length;
+
+  // Tour auto-advance: step 2 completes when the user answers a suggestion
+  // (any evidence change appends to the change log, which loadDemo cleared),
+  // step 3 when they reveal the next demo finding.
+  useEffect(() => {
+    if (demoTourStep === 2 && changeLog.length > 0) setDemoTourStep(3);
+  }, [demoTourStep, changeLog.length]);
+
+  useEffect(() => {
+    if (demoTourStep === 3 && demoFindingIndex > 0) setDemoTourStep(4);
+  }, [demoTourStep, demoFindingIndex]);
 
   const handleDebugEvidence = useCallback(() => {
     const debugPatientId = `patient_debug_${Date.now()}`;
@@ -300,6 +316,14 @@ export default function Index() {
         patientId={patientId}
         evidenceVersion={evidenceVersion}
       />
+
+      {demoTourStep !== null && (
+        <DemoGuide
+          step={demoTourStep}
+          onNext={() => setDemoTourStep(s => (s === null ? null : s + 1))}
+          onSkip={() => setDemoTourStep(null)}
+        />
+      )}
 
       <main className="flex-1 p-3 overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_360px] gap-3 h-full min-h-[500px]">
