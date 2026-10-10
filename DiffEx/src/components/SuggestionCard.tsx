@@ -24,20 +24,20 @@ export function SuggestionCard({ title, rationale, onAdd, mode = 'plus', onNo }:
   };
 
   return (
-    <div className="suggestion-card animate-slide-in group">
-      <div className="flex items-start justify-between gap-3">
+    <div className="border-b border-border border-l-2 border-l-next-step pl-2 pr-1 py-1.5 group">
+      <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-sm text-foreground mb-1 truncate group-hover:whitespace-normal group-hover:overflow-visible">{title}</h4>
+          <h4 className="font-medium text-sm text-foreground mb-0.5 truncate group-hover:whitespace-normal group-hover:overflow-visible">{title}</h4>
           <p className="text-xs text-muted-foreground line-clamp-2 group-hover:line-clamp-none">{rationale}</p>
         </div>
         {mode === 'yesno' ? (
-          <div className="flex gap-1.5 shrink-0">
+          <div className="flex gap-1 shrink-0">
             {answered ? (
               <span className={cn(
-                "text-xs font-medium px-2.5 py-1 rounded-full",
+                "text-xs font-medium px-2 py-0.5 rounded-sm border",
                 answered === 'yes'
-                  ? "bg-[hsl(var(--success))]/15 text-[hsl(var(--success))]"
-                  : "bg-muted text-muted-foreground"
+                  ? "border-[hsl(152,40%,74%)] bg-evidence-for-bg text-evidence-for"
+                  : "bg-muted text-muted-foreground border-border"
               )}>
                 {answered === 'yes' ? 'Yes' : 'No'}
               </span>
@@ -47,7 +47,7 @@ export function SuggestionCard({ title, rationale, onAdd, mode = 'plus', onNo }:
                   onClick={handleYes}
                   size="sm"
                   variant="ghost"
-                  className="h-7 px-2.5 text-xs font-medium rounded-full bg-[hsl(var(--success))]/10 text-[hsl(var(--success))] hover:bg-[hsl(var(--success))]/20"
+                  className="h-6 px-2 text-xs font-medium rounded-sm border border-[hsl(152,40%,74%)] bg-evidence-for-bg text-evidence-for hover:bg-evidence-for-bg hover:text-evidence-for hover:brightness-95"
                 >
                   Yes
                 </Button>
@@ -55,7 +55,7 @@ export function SuggestionCard({ title, rationale, onAdd, mode = 'plus', onNo }:
                   onClick={handleNo}
                   size="sm"
                   variant="ghost"
-                  className="h-7 px-2.5 text-xs font-medium rounded-full bg-muted text-muted-foreground hover:bg-muted/80"
+                  className="h-6 px-2 text-xs font-medium rounded-sm border border-border bg-muted text-muted-foreground hover:bg-muted/80"
                 >
                   No
                 </Button>
@@ -67,7 +67,7 @@ export function SuggestionCard({ title, rationale, onAdd, mode = 'plus', onNo }:
             onClick={onAdd}
             size="sm"
             variant="ghost"
-            className="shrink-0 h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
+            className="shrink-0 h-6 w-6 p-0 rounded-sm hover:bg-next-step-bg hover:text-next-step"
           >
             +
           </Button>

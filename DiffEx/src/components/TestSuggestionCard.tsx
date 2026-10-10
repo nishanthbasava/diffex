@@ -30,13 +30,13 @@ export function TestSuggestionCard({ title, rationale, onAdd }: TestSuggestionCa
   };
 
   return (
-    <div className="suggestion-card animate-slide-in group">
-      <div className="flex items-start justify-between gap-3">
+    <div className="border-b border-border border-l-2 border-l-next-step pl-2 pr-1 py-1.5 group">
+      <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-sm text-foreground mb-1 truncate group-hover:whitespace-normal group-hover:overflow-visible">{title}</h4>
+          <h4 className="font-medium text-sm text-foreground mb-0.5 truncate group-hover:whitespace-normal group-hover:overflow-visible">{title}</h4>
           <p className="text-xs text-muted-foreground line-clamp-2 group-hover:line-clamp-none">{rationale}</p>
           {importedFile && (
-            <div className="flex items-center gap-1.5 mt-1.5 text-xs text-[hsl(var(--success))]">
+            <div className="flex items-center gap-1.5 mt-1 text-xs text-evidence-for">
               <Check className="w-3 h-3" />
               <span>Result imported</span>
               <button
@@ -60,8 +60,9 @@ export function TestSuggestionCard({ title, rationale, onAdd }: TestSuggestionCa
             onClick={() => fileRef.current?.click()}
             size="sm"
             variant="ghost"
-            className="h-7 w-7 p-0 opacity-60 hover:opacity-100 hover:text-primary"
+            className="h-6 w-6 p-0 rounded-sm opacity-60 hover:opacity-100 hover:text-next-step"
             disabled={importing}
+            title="Import result file"
           >
             <Import className="w-3.5 h-3.5" />
           </Button>
@@ -69,7 +70,7 @@ export function TestSuggestionCard({ title, rationale, onAdd }: TestSuggestionCa
             onClick={onAdd}
             size="sm"
             variant="ghost"
-            className="shrink-0 h-8 w-8 p-0 hover:bg-primary/10 hover:text-primary"
+            className="shrink-0 h-6 w-6 p-0 rounded-sm hover:bg-next-step-bg hover:text-next-step"
           >
             +
           </Button>

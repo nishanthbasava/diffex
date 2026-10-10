@@ -1,4 +1,3 @@
-import { Lightbulb } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SuggestionCard } from './SuggestionCard';
 import { TestSuggestionCard } from './TestSuggestionCard';
@@ -26,27 +25,26 @@ export function SuggestionsPanel({
   return (
     <div className="panel h-full flex flex-col">
       <div className="panel-header flex items-center gap-2">
-        <Lightbulb className="w-5 h-5 text-primary" />
-        <h2 className="font-semibold text-lg">Suggestions</h2>
+        <h2 className="font-semibold text-sm">Suggestions</h2>
       </div>
 
       <div className="flex-1 flex flex-col min-h-0">
         <Tabs defaultValue="questions" className="flex-1 flex flex-col">
-          <div className="px-5 pt-4">
-            <TabsList className="w-full grid grid-cols-3">
-              <TabsTrigger value="questions">Questions</TabsTrigger>
-              <TabsTrigger value="tests">Tests</TabsTrigger>
-              <TabsTrigger value="optimizer">Optimizer</TabsTrigger>
+          <div className="px-2 pt-2">
+            <TabsList className="w-full grid grid-cols-3 h-7 rounded-sm">
+              <TabsTrigger value="questions" className="text-xs rounded-sm">Questions</TabsTrigger>
+              <TabsTrigger value="tests" className="text-xs rounded-sm">Tests</TabsTrigger>
+              <TabsTrigger value="optimizer" className="text-xs rounded-sm">Optimizer</TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="questions" className="flex-1 overflow-auto p-5 pt-3 m-0">
+          <TabsContent value="questions" className="flex-1 overflow-auto p-2 m-0">
             {questions.length === 0 ? (
               <div className="text-center text-muted-foreground py-6 text-sm">
                 Add findings to get question suggestions
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="border-t border-border">
                 {questions.map((q) => (
                   <SuggestionCard
                     key={q.id}
@@ -60,13 +58,13 @@ export function SuggestionsPanel({
             )}
           </TabsContent>
 
-          <TabsContent value="tests" className="flex-1 overflow-auto p-5 pt-3 m-0">
+          <TabsContent value="tests" className="flex-1 overflow-auto p-2 m-0">
             {tests.length === 0 ? (
               <div className="text-center text-muted-foreground py-6 text-sm">
                 Add findings to get test suggestions
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="border-t border-border">
                 {tests.map((t) => (
                   <TestSuggestionCard
                     key={t.id}
@@ -79,7 +77,7 @@ export function SuggestionsPanel({
             )}
           </TabsContent>
 
-          <TabsContent value="optimizer" className="flex-1 overflow-auto p-5 pt-3 m-0">
+          <TabsContent value="optimizer" className="flex-1 overflow-auto p-2 m-0">
             <OptimizerTab
               items={optimizerItems}
               onAddQuestion={onAddQuestion}
